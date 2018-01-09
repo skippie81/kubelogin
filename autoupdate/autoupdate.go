@@ -6,6 +6,7 @@ import (
 	"os"
 	"errors"
 	"strings"
+	"regexp"
 )
 
 type AutoUpdater struct {
@@ -50,6 +51,11 @@ func (a *AutoUpdater) Check(v string) (update bool,version string, err error) {
 
 	vers, err := ioutil.ReadAll(resp.Body)
 	version = strings.TrimSpace(string(vers))
+
+	re := regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
+	if ! re.Match([]byte(version)) {
+		err = errors.New("Non valid version string returned")
+	}
 
 	if v != version {
 		update = true
