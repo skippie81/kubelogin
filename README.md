@@ -24,7 +24,23 @@ Usage: ./kubectllogin [--kube-config] [--auth-server] COMMAND
     	Authentication webhook servers (default "auto-detect")
   -kubeconfig string
     	kube config file location (default "/Users/skippie/.kube/config")
+  -version
+    	display version and exit
 ```
+
+## Remarks
+
+before building you might want to change in cmd/kubelogin.go:
+
+```
+initialConfigUrl = "<url where your default kubectl config can be found>"
+autoUpdateVersionUrl = "<url that returns the latest version nr>"
+autoUpdateGetUrl = "<url that holds bindaries>"
+```
+
+The autoUpdateGetUrl is the base url that holds kubelogin binaries for autoupdate at path \<base url\>/v\<version\>/\<operating system\>/kubelogin. Exmple https://example.com/kubelogin as base url would hold https://example.com/kubelogin/v2.0.0/darwin/kubelogin
+
+If autoUpdateVersion url is not set or http get would return error, autoupdate is disabled.
 
 ## License
 
