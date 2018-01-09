@@ -6,9 +6,16 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 REPOPATH = kubernetes-ldap
 
-build: vendor
+
+build: vendor linux darwin windows
+
+linux: vendor
 	GOOS=linux GOARCH=amd64 go build -o bin/linux/kubectllogin cmd/kubelogin.go
+
+darwin: vendor
 	GOOS=darwin GOARCH=amd64 go build -o bin/darwin/kubectllogin cmd/kubelogin.go
+
+windows: vendor
 	GOOS=windows GOARCH=amd64 go build -o bin/windows/kubectllogin.exe cmd/kubelogin.go
 
 run:
