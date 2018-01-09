@@ -22,36 +22,49 @@ const (
 	DefaultKubeConfig = ".kube/config"
 	loginPath = "/ldapAuth"
 	validatePath = "/authenticate"
-	initialConfigUrl = ""
-	autoUpdateVersionUrl = "https://https://raw.githubusercontent.com/skippie81/kubelogin/master/VERSION"
-	autoUpdateGetUrl = "https://raw.githubusercontent.com/skippie81/kubelogin"
+	initialConfigUrl = "https://updateserver.local/initialconfig"
+	autoUpdateVersionUrl = "https://raw.githubusercontent.com/skippie81/kubelogin/master/VERSION"
+	autoUpdateGetUrl = "https://updatserver.local/kubelogin"
 	myVersion = "2.0.0"
 )
 
 func main() {
-	upd := autoupdate.CreateNew(autoUpdateVersionUrl)
-	update,version,err := upd.Check(myVersion)
-	if err == nil {
-		if update {
-			fmt.Printf("Auto Udating: %s => %s", myVersion, version)
-			goos := runtime.GOOS
-			myfilename := os.Args[0]
-			url := autoUpdateGetUrl + "/v" + version + "/bin/" + goos + "/kubelogin"
-			_ = upd.Update(url, myfilename)
-		}
-	}
-
-	flag.Set(os.Args[0],"test")
 
 	// get homedir
 	home := os.Getenv("HOME")
 	if runtime.GOOS == "windows" {
-	  home = os.Getenv("USERPROFILE")
+		home = os.Getenv("USERPROFILE")
 	}
 
+	// input flags
 	kubeconfigfileFlag := flag.String("kubeconfig",home + "/" + DefaultKubeConfig,"kube config file location")
 	loginServerFlag := flag.String("auth-server","auto-detect","Authentication webhook servers")
+	versionFlag := flag.Bool("version",false,"display version and exit")
 	flag.Parse()
+
+	// print version and exit
+	if *versionFlag {
+		fmt.Printf("Kubelogin version: v%s ( %s )\n",myVersion,runtime.Version())
+		os.Exit(0)
+	}
+
+	// autoupdater
+	upd := autoupdate.CreateNew(autoUpdateVersionUrl)
+	update,version,err := upd.Check(myVersion)
+	if err == nil {
+		if update {
+			fmt.Printf("Auto Udating: %s => %s\n", myVersion, version)
+			goos := runtime.GOOS
+			myfilename := os.Args[0]
+			url := autoUpdateGetUrl + "/v" + version + "/bin/" + goos + "/kubelogin"
+			fmt.Printf("Downloading: %s ... ",url)
+			err = upd.Update(url, myfilename)
+			if err != nil {
+				fmt.Printf("Error while updating: %s\n",err)
+			}
+			fmt.Printf("updated\n")
+		}
+	}
 
 	initializeCmd := flag.NewFlagSet("init",flag.ExitOnError)
 	loginCmd := flag.NewFlagSet("login",flag.ExitOnError)
@@ -103,14 +116,15 @@ func main() {
 		os.Exit(0)
 	}
 
+	// print current token
 	if tokenCmd.Parsed() {
 		currentToken,err := k.GetCurrentUserToken()
 		if err != nil {
 			fmt.Println("Error getting current token")
 			os.Exit(1)
 		}
-		fmt.Println("Current token:")
-		fmt.Printf("%s\n\n",currentToken)
+		fmt.Println("Your current token:")
+		fmt.Printf("%s\n",currentToken)
 		os.Exit(0)
 	}
 
@@ -162,11 +176,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	if tokenCmd.Parsed() {
-		fmt.Println(k.GetCurrentUserToken())
-		os.Exit(0)
-	}
-
 	fmt.Printf("Current login server: %s\n",loginserver)
 
 	// read username and password
@@ -215,7 +224,7 @@ func main() {
 		fmt.Printf("FAIL (%s)",err)
 		os.Exit(1)
 	}
-	fmt.Printf("done\n")
+	fmt.Printf("ok\n")
 }
 
 func doHelp(cmdline string) {

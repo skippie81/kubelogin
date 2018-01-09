@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"errors"
+	"strings"
 )
 
 type AutoUpdater struct {
@@ -19,7 +20,7 @@ func (a *AutoUpdater) Update(url,file string) (err error) {
 	if err != nil {
 		return
 	}
-	if resp.Status != "200" {
+	if resp.Status != "200 OK" {
 		err = errors.New("unable to get new version")
 		return
 	}
@@ -42,13 +43,13 @@ func (a *AutoUpdater) Check(v string) (update bool,version string, err error) {
 
 	defer resp.Body.Close()
 
-	if resp.Status != "200" {
+	if resp.Status != "200 OK" {
 		err = errors.New("Unable to get required version")
 		return
 	}
 
 	vers, err := ioutil.ReadAll(resp.Body)
-	version = string(vers)
+	version = strings.TrimSpace(string(vers))
 
 	if v != version {
 		update = true
