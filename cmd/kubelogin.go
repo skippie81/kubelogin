@@ -56,7 +56,7 @@ func main() {
 			fmt.Printf("Auto Udating: %s => %s\n", myVersion, version)
 			goos := runtime.GOOS
 			myfilename := os.Args[0]
-			url := autoUpdateGetUrl + "/v" + version + "/bin/" + goos + "/kubelogin"
+			url := autoUpdateGetUrl + "/v" + version + "/" + goos + "/kubelogin"
 			fmt.Printf("Downloading: %s ... ",url)
 			err = upd.Update(url, myfilename)
 			if err != nil {
