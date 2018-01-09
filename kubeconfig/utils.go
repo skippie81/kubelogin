@@ -3,22 +3,21 @@ package kubeconfig
 import (
 	"regexp"
 	"errors"
-	"fmt"
 )
 
 const (
-	authServerName = "https://auth."
+	authServerName = "https://auth"
 )
 
 func GetLoginServer(apiserver string) (server string, err error) {
-	re := regexp.MustCompile(`https:\/\/`)
-	srv := re.ReplaceAllString(apiserver,"")
 
-	re = regexp.MustCompile(`^k8s\-api\.`)
-	if re.Match([]byte(srv)) == true {
-		server = re.ReplaceAllString(srv, authServerName)
-		return
+	re := regexp.MustCompile(`http[s]{1}:\/\/[a-zA-z0-9_\-]+`)
+
+	if ! re.Match([]byte(apiserver)) {
+		err = errors.New("unable to auto-detect authentication server")
 	}
-	err = errors.New(fmt.Sprintf("Unable to determine login server for: %s",apiserver))
+
+	server = re.ReplaceAllString(apiserver,authServerName)
+
 	return
 }
