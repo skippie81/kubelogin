@@ -49,6 +49,8 @@ func main() {
 	}
 
 	// autoupdater
+	// TODO: get dir of binary if invoked when bin is in PATH
+
 	upd := autoupdate.CreateNew(autoUpdateVersionUrl)
 	update,version,err := upd.Check(myVersion)
 	if err == nil {
@@ -183,7 +185,6 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Username: ")
 	username, _ = reader.ReadString('\n')
-	//username = strings.Replace(username, "\n", "", -1)
 	username = strings.TrimSpace(username)
 
 	fmt.Print("Password: ")
